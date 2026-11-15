@@ -504,3 +504,81 @@ function render() {
 }
 setInterval(render, 500);
 setInterval(() => { if (!S.open && S.price) S.open = S.price; }, 5000);
+
+// ---------- ABAS MOBILE (iPhone/Safari) ----------
+(function initTabs() {
+  const btns = document.querySelectorAll('.tab-btn');
+  const panels = document.querySelectorAll('.panel[data-tab]');
+  function activate(name) {
+    btns.forEach((b) => b.classList.toggle('active', b.dataset.tab === name));
+    panels.forEach((p) => p.classList.toggle('tab-on', p.dataset.tab === name));
+    try { localStorage.setItem('jt_tab', name); } catch {}
+  }
+  btns.forEach((b) => { b.onclick = () => activate(b.dataset.tab); });
+  // restaura última aba; no desktop o CSS ignora (todos painéis visíveis)
+  let saved = 'terminal';
+  try { saved = localStorage.getItem('jt_tab') || 'terminal'; } catch {}
+  activate(btns.length ? [...btns].some(b => b.dataset.tab === saved) ? saved : 'terminal' : 'terminal');
+})();
+
+// ---------- RELATÓRIO OFFLINE (equipe operou com app fechado) ----------
+function showOfflineReport(rep) {
+  if (!rep || !rep.at) return;
+  try { if (localStorage.getItem('jt_offseen') === String(rep.at)) return; } catch {}
+  const h = Math.floor(rep.seconds / 3600), m = Math.floor((rep.seconds % 3600) / 60);
+  const away = h > 0 ? `${h}h ${m}min` : `${m}min`;
+  const d = rep.pnlDelta;
+  const el = $('offBanner');
+  el.innerHTML = `🌙 Relatório de retorno — fora por <b>${away}</b>: ` +
+    `<b>${rep.trades}</b> operações · Δ <b class="${d >= 0 ? 'up' : 'dn'}">${d >= 0 ? '+' : ''}$${d.toFixed(2)}</b> → ` +
+    `<b>$${rep.to.toFixed(2)}</b> <button id="offClose">OK</button>`;
+  el.classList.remove('hidden');
+  $('offClose').onclick = () => { el.classList.add('hidden'); try { localStorage.setItem('jt_offseen', String(rep.at)); } catch {} };
+  try { localStorage.setItem('jt_offseen', String(rep.at)); } catch {}
+}
+const _ingest = ingestState;
+ingestState = function (st) { _ingest(st); if (st && st.offline) showOfflineReport(st.offline); };
+
+// ---------- PAINEL RH (contratar / demitir / folha) ----------
+function renderRH() {
+  const sum = $('rhSummary'), list = $('rhList');
+  if (!sum || !list) return;
+  const staff = S.dbStaff && Object.keys(S.dbStaff).length ? S.dbStaff : lsGet('jt_staff', {});
+  const names = Object.keys(staff).filter((n) => !(staff[n] && staff[n].fired));
+  const vagas = Math.max(0, 4 - names.length); // estações da ala de contratos
+  const folha = names.length * 1400;          // salário médio estimado R$/mês
+  sum.innerHTML =
+    `<span>👥 Ativos: <b>${names.length}</b></span>` +
+    `<span>🪑 Vagas na Agência: <b>${vagas}</b></span>` +
+    `<span>💰 Folha estimada: <b>$${folha.toLocaleString('en-US')}</b>/mês</span>`;
+  if (!names.length) {
+    list.innerHTML = '<div style="color:#848E9C;font-size:11px">Sincronizando equipe…</div>';
+    return;
+  }
+  list.innerHTML = names.map((n) => {
+    const s = staff[n] || {};
+    const ini = n.split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase();
+    const ts = S.traderStats.get(n) || { trades: 0, wins: 0, pnl: 0 };
+    const wr = ts.trades ? Math.round(ts.wins / ts.trades * 100) : 0;
+    return `<div class="rh-row">
+      <div class="avatar">${ini}</div>
+      <div class="rh-info">
+        <div class="rh-name">${n} ${s.cargo ? `· ${s.cargo}` : ''}</div>
+        <div class="rh-meta">QI ${s.iq || 0} · ${ts.trades} ops · ${wr}% acerto · $${Math.round(s.profit || 0).toLocaleString('en-US')}</div>
+      </div>
+      <button class="rh-fire" data-trader="${n}">Demitir</button>
+    </div>`;
+  }).join('');
+  list.querySelectorAll('.rh-fire').forEach((b) => {
+    b.onclick = () => {
+      if (!confirm(`Demitir ${b.dataset.trader}? Ele(a) sai da empresa e da folha.`)) return;
+      sendCmd({ cmd: 'fire', trader: b.dataset.trader });
+      b.textContent = 'Saindo…'; b.disabled = true;
+    };
+  });
+}
+$('btnHire').onclick = (e) => {
+  sendCmd({ cmd: 'hire' });
+  e.target.classList.add('sent'); setTimeout(() => e.target.classList.remove('sent'), 600);
+};
+setInterval(renderRH, 2500); renderRH();

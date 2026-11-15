@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>J Tradings — Bitcoin Exchange</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
@@ -31,10 +31,12 @@
 </header>
 
 <div id="meetBanner" class="hidden">⏸ MERCADO EM PAUSA — REUNIÃO EXECUTIVA EM ANDAMENTO</div>
+<div id="offBanner" class="hidden"></div>
+
 <main class="grid">
   <!-- COLUNA PRINCIPAL -->
   <section class="col-left">
-    <div class="panel chart-panel">
+    <div class="panel chart-panel" data-tab="terminal">
       <div class="panel-head">
         <span class="ph-title">BTC/USDT · Candlestick 1s</span>
         <span class="ph-badge live">AO VIVO</span>
@@ -42,13 +44,12 @@
       <div id="chartWrap"><canvas id="cv"></canvas></div>
       <div class="legend mono">
         <span><i class="lg ema"></i>EMA 20</span>
-        <span><i class="lg sma"></i>SMA 50</span>
         <span><i class="lg mark buy"></i>Compra NPC</span>
         <span><i class="lg mark sell"></i>Venda NPC</span>
       </div>
     </div>
 
-    <div class="panel equity-panel">
+    <div class="panel equity-panel" data-tab="terminal">
       <div class="panel-head">
         <span class="ph-title">Curva de Patrimônio — Caixa da Empresa</span>
         <span class="ph-badge" id="eqBadge">$0.00</span>
@@ -59,7 +60,7 @@
 
   <!-- COLUNA LATERAL -->
   <aside class="col-right">
-    <div class="panel cmd-panel">
+    <div class="panel" data-tab="comandos">
       <div class="panel-head"><span class="ph-title">Comando do Chefe</span><span class="ph-badge cmd">REMOTO</span></div>
       <div class="cmd-btns">
         <button id="cmdMeet" class="cmd-btn meet">📅 Convocar Reunião</button>
@@ -70,7 +71,7 @@
       </div>
     </div>
 
-    <div class="panel">
+    <div class="panel" data-tab="comandos">
       <div class="panel-head"><span class="ph-title">Caixa J Tradings</span><span class="ph-badge ok">BASE $0.00</span></div>
       <div class="bal mono" id="bal">$0.00</div>
       <div class="pnl mono" id="pnl">PnL $0.00</div>
@@ -80,7 +81,7 @@
       <div class="goals" id="goals"></div>
     </div>
 
-    <div class="panel">
+    <div class="panel" data-tab="comandos">
       <div class="panel-head"><span class="ph-title">Operar</span></div>
       <div class="qty"><input id="qty" type="number" step="0.001" min="0.001" value="0.005" class="mono"></div>
       <div class="btns">
@@ -89,22 +90,40 @@
       </div>
     </div>
 
-    <div class="panel book-panel">
+    <div class="panel book-panel" data-tab="terminal">
       <div class="panel-head"><span class="ph-title">Livro de Ordens</span></div>
       <div id="book"></div>
     </div>
 
-    <div class="panel staff-panel">
+    <div class="panel staff-panel" data-tab="equipe">
       <div class="panel-head"><span class="ph-title">Equipe de Traders</span><span class="ph-badge ia">IA ATIVA</span></div>
       <div id="staffGrid" class="staff-grid"></div>
     </div>
 
-    <div class="panel feed-panel">
+    <div class="panel rh-panel" data-tab="rh">
+      <div class="panel-head"><span class="ph-title">Recursos Humanos</span><span class="ph-badge cmd">RH</span></div>
+      <div class="rh-summary mono" id="rhSummary"></div>
+      <div class="rh-actions">
+        <button id="btnHire" class="cmd-btn" style="flex:1">🤝 Contratar da Agência</button>
+      </div>
+      <div id="rhList" class="rh-list"></div>
+    </div>
+
+    <div class="panel feed-panel" data-tab="terminal">
       <div class="panel-head"><span class="ph-title">Ordens em Tempo Real</span></div>
       <div id="feed"></div>
     </div>
   </aside>
 </main>
+
+<!-- Barra de abas inferior (mobile) -->
+<nav id="tabbar">
+  <button class="tab-btn active" data-tab="terminal">📈<span>Terminal</span></button>
+  <button class="tab-btn" data-tab="equipe">👥<span>Equipe</span></button>
+  <button class="tab-btn" data-tab="rh">🧑‍💼<span>RH</span></button>
+  <button class="tab-btn" data-tab="comandos">⚡<span>Comandos</span></button>
+</nav>
+
 <script src="script.js"></script>
 </body>
 </html>

@@ -206,3 +206,79 @@ main.grid{
   main.grid{grid-template-columns:1fr;grid-template-rows:minmax(0,1.2fr) minmax(0,1fr)}
   .col-right{overflow-y:auto}
 }
+
+/* ---------- PAINEL RH ---------- */
+.rh-summary{padding:10px 14px 4px;font-size:11px;color:var(--dim);display:flex;flex-direction:column;gap:3px}
+.rh-actions{padding:8px 14px}
+.rh-list{padding:4px 14px 14px;display:flex;flex-direction:column;gap:6px;max-height:340px;overflow-y:auto}
+.rh-row{
+  display:flex;align-items:center;gap:10px;padding:8px 10px;
+  background:var(--panel2);border:1px solid var(--line);border-radius:10px;font-size:12px;
+}
+.rh-row .avatar{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#2b6cb0,#1a365d);display:grid;place-items:center;font-weight:700;font-size:11px;color:#fff;flex:0 0 auto}
+.rh-info{flex:1;min-width:0}
+.rh-name{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rh-meta{font-size:10px;color:var(--dim);font-family:'JetBrains Mono',monospace}
+.rh-fire{background:rgba(246,70,93,.12);border:1px solid rgba(246,70,93,.35);color:var(--dn);border-radius:8px;padding:6px 10px;font-size:11px;font-weight:700;cursor:pointer}
+.rh-fire:active{background:rgba(246,70,93,.3)}
+.rh-hire-note{font-size:10px;color:var(--dim);padding:0 14px 10px}
+
+/* ---------- BANNER OFFLINE ---------- */
+#offBanner{
+  flex:0 0 auto;padding:10px 16px;text-align:center;
+  background:linear-gradient(90deg,rgba(14,203,129,.14),rgba(14,203,129,.04));
+  border-bottom:1px solid rgba(14,203,129,.35);
+  color:var(--up);font-weight:600;font-size:12px;letter-spacing:.04em;
+  display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;
+}
+#offBanner.hidden{display:none}
+#offBanner button{
+  background:none;border:1px solid rgba(14,203,129,.4);color:var(--up);
+  border-radius:6px;padding:2px 10px;font-size:11px;cursor:pointer;
+}
+
+/* ---------- BARRA DE ABAS (mobile) ---------- */
+#tabbar{display:none}
+
+/* ---------- MOBILE / iOS (iPhone 11 / Safari) ---------- */
+@media (max-width:820px){
+  html,body{height:100%;overflow:hidden}
+  body{height:100vh;height:100dvh;-webkit-text-size-adjust:100%}
+  .topbar{flex:0 0 auto;padding:8px 10px;gap:8px;flex-wrap:wrap}
+  .brand{min-width:0}
+  .brand-sub{display:none}
+  .stats{display:none}
+  .ticker{margin-left:auto}
+  .t-price{font-size:17px}
+  .conn span#net{display:none}
+  main.grid{display:block;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:76px}
+  .col-left,.col-right{display:block}
+  .panel{display:none;margin:10px}
+  .panel.tab-on{display:block}
+  .chart-panel .legend{flex-wrap:wrap;font-size:9px}
+  #chartWrap,#eqWrap{height:230px}
+  /* inputs ≥16px p/ Safari não dar zoom automático */
+  input,select,textarea{font-size:16px!important}
+  .qty input{font-size:16px}
+  .cmd-btn,.btn-buy,.btn-sell{min-height:46px;font-size:13px}
+  .mini-btn{min-width:34px;min-height:34px}
+  /* barra inferior fixa estilo app nativo */
+  #tabbar{
+    display:flex;position:fixed;left:0;right:0;bottom:0;z-index:50;
+    background:rgba(15,20,25,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    border-top:1px solid var(--line);padding:6px 4px calc(6px + env(safe-area-inset-bottom));
+  }
+  .tab-btn{
+    flex:1;background:none;border:none;color:var(--dim);cursor:pointer;
+    display:flex;flex-direction:column;align-items:center;gap:2px;
+    font-size:17px;padding:4px 0;-webkit-tap-highlight-color:transparent;
+  }
+  .tab-btn span{font-size:9px;font-weight:600;letter-spacing:.03em}
+  .tab-btn.active{color:var(--gold)}
+  .tab-btn:active{transform:scale(.94)}
+  .staff-grid{grid-template-columns:1fr}
+}
+@media (min-width:821px){
+  /* desktop: tabbar escondida, todos painéis visíveis */
+  .panel[data-tab]{display:block}
+}
