@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>J Tradings — Bitcoin Exchange</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <div class="logo-mark">J</div>
+    <div>
+      <div class="brand-name">J TRADINGS</div>
+      <div class="brand-sub">BITCOIN EXCHANGE</div>
+    </div>
+  </div>
+  <div class="pair-badge">BTC<span>/USDT</span></div>
+  <div class="ticker">
+    <div class="t-price mono" id="price">—</div>
+    <div class="t-chg mono" id="chg">—</div>
+  </div>
+  <div class="stats mono">
+    <div class="st"><span>24h Máx</span><b id="h24">—</b></div>
+    <div class="st"><span>24h Mín</span><b id="l24">—</b></div>
+    <div class="st"><span>24h Volume</span><b id="v24">—</b></div>
+  </div>
+  <div class="conn"><span class="dot" id="netDot"></span><span id="net">OFFLINE</span></div>
+</header>
+
+<div id="meetBanner" class="hidden">⏸ MERCADO EM PAUSA — REUNIÃO EXECUTIVA EM ANDAMENTO</div>
+<main class="grid">
+  <!-- COLUNA PRINCIPAL -->
+  <section class="col-left">
+    <div class="panel chart-panel">
+      <div class="panel-head">
+        <span class="ph-title">BTC/USDT · Candlestick 1s</span>
+        <span class="ph-badge live">AO VIVO</span>
+      </div>
+      <div id="chartWrap"><canvas id="cv"></canvas></div>
+      <div class="legend mono">
+        <span><i class="lg ema"></i>EMA 20</span>
+        <span><i class="lg sma"></i>SMA 50</span>
+        <span><i class="lg mark buy"></i>Compra NPC</span>
+        <span><i class="lg mark sell"></i>Venda NPC</span>
+      </div>
+    </div>
+
+    <div class="panel equity-panel">
+      <div class="panel-head">
+        <span class="ph-title">Curva de Patrimônio — Caixa da Empresa</span>
+        <span class="ph-badge" id="eqBadge">$0.00</span>
+      </div>
+      <div id="eqWrap"><canvas id="eq"></canvas></div>
+    </div>
+  </section>
+
+  <!-- COLUNA LATERAL -->
+  <aside class="col-right">
+    <div class="panel cmd-panel">
+      <div class="panel-head"><span class="ph-title">Comando do Chefe</span><span class="ph-badge cmd">REMOTO</span></div>
+      <div class="cmd-btns">
+        <button id="cmdMeet" class="cmd-btn meet">📅 Convocar Reunião</button>
+        <button id="cmdEnd" class="cmd-btn end">✅ Encerrar Reunião</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head"><span class="ph-title">Caixa J Tradings</span><span class="ph-badge ok">BASE $0.00</span></div>
+      <div class="bal mono" id="bal">$0.00</div>
+      <div class="pnl mono" id="pnl">PnL $0.00</div>
+      <div class="kv mono"><span>Posição</span><b id="pos">0.0000 BTC</b></div>
+      <div class="kv mono"><span>Preço médio</span><b id="avg">—</b></div>
+      <div class="kv mono"><span>Lucro total banco</span><b id="dbtot">$0.00</b></div>
+      <div class="goals" id="goals"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head"><span class="ph-title">Operar</span></div>
+      <div class="qty"><input id="qty" type="number" step="0.001" min="0.001" value="0.005" class="mono"></div>
+      <div class="btns">
+        <button id="btnBuy" class="btn-buy">▲ COMPRAR · LONG</button>
+        <button id="btnSell" class="btn-sell">▼ VENDER · SHORT</button>
+      </div>
+    </div>
+
+    <div class="panel book-panel">
+      <div class="panel-head"><span class="ph-title">Livro de Ordens</span></div>
+      <div id="book"></div>
+    </div>
+
+    <div class="panel staff-panel">
+      <div class="panel-head"><span class="ph-title">Equipe de Traders</span><span class="ph-badge ia">IA ATIVA</span></div>
+      <div id="staffGrid" class="staff-grid"></div>
+    </div>
+
+    <div class="panel feed-panel">
+      <div class="panel-head"><span class="ph-title">Ordens em Tempo Real</span></div>
+      <div id="feed"></div>
+    </div>
+  </aside>
+</main>
+<script src="script.js"></script>
+</body>
+</html>

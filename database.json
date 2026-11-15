@@ -1,0 +1,25 @@
+{
+  "meta": {
+    "name": "J Tradings Bitcoin Exchange",
+    "version": "12.0.0",
+    "symbol": "BTCUSDT",
+    "baseBalance": 0,
+    "currency": "USD",
+    "updatedAt": null
+  },
+  "totals": {
+    "balance": 0,
+    "realizedPnl": 0,
+    "unrealizedPnl": 0,
+    "totalVolume": 0,
+    "totalOrders": 0
+  },
+  "meeting": false,
+  "staff": {},
+  "staffSave": [],
+  "orders": [],
+  "transactions": [],
+  "pnl": [],
+  "equity": [],
+  "errors": []
+}
