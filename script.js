@@ -277,7 +277,7 @@ function drawChart() {
   const Y = v => padT + (1 - (v - mn) / (mx - mn)) * plotH;
   // grid sutil — 4 linhas
   ctx.strokeStyle = 'rgba(43,49,57,.55)'; ctx.fillStyle = '#6b7684';
-  ctx.font = '10px JetBrains Mono, monospace'; ctx.lineWidth = 1;
+  ctx.font = '12px JetBrains Mono, monospace'; ctx.lineWidth = 1;
   for (let i = 0; i <= 4; i++) {
     const v = mn + (mx - mn) * i / 4, y = Y(v);
     ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(plotW, y); ctx.stroke();
@@ -320,7 +320,7 @@ function drawChart() {
   ctx.beginPath();
   ctx.roundRect(tagX, ly - 10, tagW, 20, 4);
   ctx.fill();
-  ctx.fillStyle = '#fff'; ctx.font = 'bold 10px JetBrains Mono, monospace';
+  ctx.fillStyle = '#fff'; ctx.font = 'bold 12px JetBrains Mono, monospace';
   ctx.textAlign = 'center';
   ctx.fillText(MONO(lp), tagX + tagW / 2, ly + 3.5);
   ctx.textAlign = 'left';
