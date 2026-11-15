@@ -154,6 +154,7 @@ function sendCmd(payload) {
 }
 $('cmdMeet').onclick = (e) => { sendCmd({ cmd: 'reuniao' }); e.target.classList.add('sent'); setTimeout(() => e.target.classList.remove('sent'), 600); };
 $('cmdEnd').onclick = (e) => { sendCmd({ cmd: 'fimreuniao' }); e.target.classList.add('sent'); setTimeout(() => e.target.classList.remove('sent'), 600); };
+$('cmdReport').onclick = (e) => { sendCmd({ cmd: 'report' }); e.target.classList.add('sent'); setTimeout(() => e.target.classList.remove('sent'), 600); };
 function pollLocal() {
   const q = lsGet('jt_orders', []);
   if (q.length) {
@@ -251,73 +252,86 @@ function drawChart() {
   const W = cv.clientWidth, H = cv.clientHeight;
   if (!W || !H) return;
   const dpr = devicePixelRatio || 1;
-  if (cv.width !== W * dpr) { cv.width = W * dpr; cv.height = H * dpr; }
+  if (cv.width !== W * dpr || cv.height !== H * dpr) { cv.width = W * dpr; cv.height = H * dpr; }
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  ctx.fillStyle = '#0B0E11'; ctx.fillRect(0, 0, W, H);
+  // fundo com leve gradiente vertical
+  const g = ctx.createLinearGradient(0, 0, 0, H);
+  g.addColorStop(0, '#0d1117'); g.addColorStop(1, '#0B0E11');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
   const cs = S.candles; if (cs.length < 2) return;
-  const padR = 64, padT = 10, padB = 22;
+  const padR = 68, padT = 12, padB = 24;
   const plotW = W - padR, plotH = H - padT - padB;
-  const vis = cs.slice(-90);
+  const vis = cs.slice(-64);
   const closes = vis.map(c => c.c);
-  const e20 = ema(closes, 20), s50 = sma(closes, 50);
+  const e20 = ema(closes, 20);
   let mn = Infinity, mx = -Infinity;
   for (const c of vis) { mn = Math.min(mn, c.l); mx = Math.max(mx, c.h); }
-  for (const v of [...e20, ...s50]) if (v != null) { mn = Math.min(mn, v); mx = Math.max(mx, v); }
-  const rg = (mx - mn) || 1; mn -= rg * 0.07; mx += rg * 0.07;
+  for (const v of e20) { mn = Math.min(mn, v); mx = Math.max(mx, v); }
+  const rg = (mx - mn) || 1; mn -= rg * 0.08; mx += rg * 0.08;
   const n = vis.length;
   const X = i => (i / (n - 1)) * plotW;
   const Y = v => padT + (1 - (v - mn) / (mx - mn)) * plotH;
-  // grid + preços eixo Y
-  ctx.strokeStyle = 'rgba(43,49,57,.7)'; ctx.fillStyle = '#848E9C';
+  // grid sutil — 4 linhas
+  ctx.strokeStyle = 'rgba(43,49,57,.55)'; ctx.fillStyle = '#6b7684';
   ctx.font = '10px JetBrains Mono, monospace'; ctx.lineWidth = 1;
-  for (let i = 0; i <= 5; i++) {
-    const v = mn + (mx - mn) * i / 5, y = Y(v);
+  for (let i = 0; i <= 4; i++) {
+    const v = mn + (mx - mn) * i / 4, y = Y(v);
     ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(plotW, y); ctx.stroke();
-    ctx.fillText(MONO(v), plotW + 6, y + 3);
+    ctx.fillText(MONO(v), plotW + 6, y + 3.5);
   }
+  // separador do eixo de preços
+  ctx.strokeStyle = 'rgba(43,49,57,.8)';
+  ctx.beginPath(); ctx.moveTo(plotW, padT - 4); ctx.lineTo(plotW, H - padB); ctx.stroke();
   const cw = plotW / n;
+  const bodyW = Math.max(3, cw * .62);
   vis.forEach((c, i) => {
     const x = X(i) + cw / 2, up = c.c >= c.o;
-    ctx.strokeStyle = up ? C_UP : C_DN; ctx.fillStyle = up ? C_UP : C_DN;
+    const col = up ? C_UP : C_DN;
+    // pavio
+    ctx.strokeStyle = col; ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(x, Y(c.h)); ctx.lineTo(x, Y(c.l)); ctx.stroke();
+    // corpo
     const yO = Y(c.o), yC = Y(c.c);
-    ctx.globalAlpha = .92;
-    ctx.fillRect(x - cw * .36, Math.min(yO, yC), Math.max(1, cw * .72), Math.max(1, Math.abs(yC - yO)));
+    ctx.fillStyle = col;
+    ctx.globalAlpha = .95;
+    ctx.fillRect(x - bodyW / 2, Math.min(yO, yC), bodyW, Math.max(1.5, Math.abs(yC - yO)));
     ctx.globalAlpha = 1;
   });
-  // médias móveis
-  const line = (arr, color, dash) => {
-    ctx.strokeStyle = color; ctx.lineWidth = 1.4;
-    ctx.setLineDash(dash || []);
-    ctx.beginPath(); let started = false;
-    arr.forEach((v, i) => {
-      if (v == null) return;
-      const x = X(i) + cw / 2, y = Y(v);
-      started ? ctx.lineTo(x, y) : ctx.moveTo(x, y); started = true;
-    });
-    ctx.stroke(); ctx.setLineDash([]);
-  };
-  line(e20, ACCENT); line(s50, BLUE, [4, 3]);
-  // linha do último preço (pontilhada)
-  const lp = vis[n - 1].c, ly = Y(lp);
-  ctx.strokeStyle = 'rgba(234,236,239,.5)'; ctx.setLineDash([5, 4]); ctx.lineWidth = 1;
+  // EMA 20
+  ctx.strokeStyle = '#F0B90B'; ctx.lineWidth = 1.6;
+  ctx.beginPath(); let started = false;
+  e20.forEach((v, i) => {
+    if (v == null) return;
+    const x = X(i) + cw / 2, y = Y(v);
+    started ? ctx.lineTo(x, y) : ctx.moveTo(x, y); started = true;
+  });
+  ctx.stroke();
+  // linha do último preço + tag
+  const lp = vis[n - 1].c, ly = Y(lp), up = lp >= vis[n - 1].o;
+  ctx.strokeStyle = up ? 'rgba(14,203,129,.55)' : 'rgba(246,70,93,.55)';
+  ctx.setLineDash([6, 4]); ctx.lineWidth = 1;
   ctx.beginPath(); ctx.moveTo(0, ly); ctx.lineTo(plotW, ly); ctx.stroke(); ctx.setLineDash([]);
-  ctx.fillStyle = lp >= vis[n - 1].o ? C_UP : C_DN;
-  ctx.fillRect(plotW + 2, ly - 8, padR - 4, 16);
-  ctx.fillStyle = '#0B0E11'; ctx.font = 'bold 10px JetBrains Mono, monospace';
-  ctx.fillText(MONO(lp), plotW + 6, ly + 3.5);
+  const tagW = 66, tagX = plotW + 1;
+  ctx.fillStyle = up ? C_UP : C_DN;
+  ctx.beginPath();
+  ctx.roundRect(tagX, ly - 10, tagW, 20, 4);
+  ctx.fill();
+  ctx.fillStyle = '#fff'; ctx.font = 'bold 10px JetBrains Mono, monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText(MONO(lp), tagX + tagW / 2, ly + 3.5);
+  ctx.textAlign = 'left';
   // marcadores de ordens NPC
   const t0 = vis[0].t, t1 = vis[n - 1].t;
-  ctx.font = 'bold 9px Inter, sans-serif';
   for (const m of S.markers) {
     if (m.t < t0 || m.price < mn || m.price > mx) continue;
     const i = ((m.t - t0) / Math.max(1, t1 - t0)) * (n - 1);
     const x = X(Math.max(0, Math.min(n - 1, i))) + cw / 2, y = Y(m.price);
     ctx.fillStyle = m.side === 'buy' ? C_UP : C_DN;
+    ctx.strokeStyle = '#0B0E11'; ctx.lineWidth = 1.5;
     ctx.beginPath();
-    if (m.side === 'buy') { ctx.moveTo(x, y - 7); ctx.lineTo(x - 4.5, y + 3); ctx.lineTo(x + 4.5, y + 3); }
-    else { ctx.moveTo(x, y + 7); ctx.lineTo(x - 4.5, y - 3); ctx.lineTo(x + 4.5, y - 3); }
-    ctx.closePath(); ctx.fill();
+    if (m.side === 'buy') { ctx.moveTo(x, y - 9); ctx.lineTo(x - 5, y + 4); ctx.lineTo(x + 5, y + 4); }
+    else { ctx.moveTo(x, y + 9); ctx.lineTo(x - 5, y - 4); ctx.lineTo(x + 5, y - 4); }
+    ctx.closePath(); ctx.fill(); ctx.stroke();
   }
 }
 setInterval(drawChart, 250);
@@ -404,7 +418,7 @@ function renderStaff() {
     return `<div class="staff-card">
       <div class="avatar">${ini}</div>
       <div class="staff-info">
-        <div class="staff-name">${n}</div>
+        <div class="staff-name">${n} ${s.cargo ? `<span class="cargo">· ${s.cargo}</span>` : ''}</div>
         <div class="staff-meta">QI ${iq} · ${ts.trades} ops · ${wr}% acerto</div>
       </div>
       <div class="staff-actions">
