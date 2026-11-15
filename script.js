@@ -4,7 +4,11 @@
 //  Canal de sync: http://127.0.0.1:47821/api/state (servidor do app)
 //  Fallback: localStorage (mesma origem do iframe no Electron)
 // ============================================================
-const API_BASE = 'http://127.0.0.1:47821';
+// se a página foi servida pelo próprio app (celular no Wi-Fi → http://IP:47821),
+// usa a mesma origem p/ a API; senão (iframe do app / GitHub Pages) usa 127.0.0.1
+const API_BASE = (location.port === '47821' && /^https?:$/.test(location.protocol))
+  ? location.origin
+  : 'http://127.0.0.1:47821';
 const SYNC_URL = API_BASE + '/api/state';
 const CMD_URL = API_BASE + '/api/cmd';
 const EQ_URL = API_BASE + '/api/equity';
@@ -505,20 +509,40 @@ function render() {
 setInterval(render, 500);
 setInterval(() => { if (!S.open && S.price) S.open = S.price; }, 5000);
 
-// ---------- ABAS MOBILE (iPhone/Safari) ----------
-(function initTabs() {
-  const btns = document.querySelectorAll('.tab-btn');
-  const panels = document.querySelectorAll('.panel[data-tab]');
-  function activate(name) {
-    btns.forEach((b) => b.classList.toggle('active', b.dataset.tab === name));
-    panels.forEach((p) => p.classList.toggle('tab-on', p.dataset.tab === name));
-    try { localStorage.setItem('jt_tab', name); } catch {}
+// ---------- NAVEGAÇÃO POR SEÇÃO (estilo Twitter) ----------
+(function initNav() {
+  const btns = document.querySelectorAll('.nav-btn');
+  const cards = document.querySelectorAll('.card');
+  // mapeia seções para cards (índice baseado na ordem do HTML)
+  const sectionMap = {
+    top: 0,      // gráfico
+    staff: 6,    // equipe (após gráfico, caixa, equity, operar, comandos, book)
+    rh: 7,       // RH
+    cmd: 4,      // comandos
+  };
+  function scrollToSection(name) {
+    btns.forEach((b) => b.classList.toggle('active', b.dataset.section === name));
+    const idx = sectionMap[name];
+    if (idx !== undefined && cards[idx]) {
+      cards[idx].scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   }
-  btns.forEach((b) => { b.onclick = () => activate(b.dataset.tab); });
-  // restaura última aba; no desktop o CSS ignora (todos painéis visíveis)
-  let saved = 'terminal';
-  try { saved = localStorage.getItem('jt_tab') || 'terminal'; } catch {}
-  activate(btns.length ? [...btns].some(b => b.dataset.tab === saved) ? saved : 'terminal' : 'terminal');
+  btns.forEach((b) => { b.onclick = () => scrollToSection(b.dataset.section); });
+  // scroll spy: marca botão ativo baseado na posição
+  window.addEventListener('scroll', () => {
+    const scrollY = window.scrollY + 100;
+    let active = 'top';
+    cards.forEach((card, i) => {
+      if (card.offsetTop <= scrollY) {
+        // encontra a seção correspondente
+        if (i === 0) active = 'top';
+        else if (i === 4) active = 'cmd';
+        else if (i === 6) active = 'staff';
+        else if (i === 7) active = 'rh';
+      }
+    });
+    btns.forEach((b) => b.classList.toggle('active', b.dataset.section === active));
+  }, { passive: true });
 })();
 
 // ---------- RELATÓRIO OFFLINE (equipe operou com app fechado) ----------
@@ -533,7 +557,9 @@ function showOfflineReport(rep) {
     `<b>${rep.trades}</b> operações · Δ <b class="${d >= 0 ? 'up' : 'dn'}">${d >= 0 ? '+' : ''}$${d.toFixed(2)}</b> → ` +
     `<b>$${rep.to.toFixed(2)}</b> <button id="offClose">OK</button>`;
   el.classList.remove('hidden');
-  $('offClose').onclick = () => { el.classList.add('hidden'); try { localStorage.setItem('jt_offseen', String(rep.at)); } catch {} };
+  const hide = () => { el.classList.add('hidden'); try { localStorage.setItem('jt_offseen', String(rep.at)); } catch {} };
+  $('offClose').onclick = hide;
+  setTimeout(hide, 20000); // some sozinho em 20s
   try { localStorage.setItem('jt_offseen', String(rep.at)); } catch {}
 }
 const _ingest = ingestState;
