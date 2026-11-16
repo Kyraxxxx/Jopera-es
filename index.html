@@ -3,11 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <title>J Tradings — Terminal BTC</title>
 <link rel="icon" type="image/png" href="favicon.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=4">
 </head>
 <body>
 
@@ -26,7 +27,7 @@
     <span class="chg mono" id="chg">—</span>
   </div>
   <div class="hd-right">
-    <div class="conn"><i class="dot" id="netDot"></i><span id="net">OFFLINE</span></div>
+    <div class="conn"><i class="dot" id="netDot"></i><span id="net">OFFLINE</span><span class="sync-age mono" id="syncAge"></span></div>
     <div class="bal-pill mono" id="balPill">$0.00</div>
   </div>
 </header>
@@ -127,6 +128,6 @@
   <button class="nb" data-sec="cmd">⚡<span>Comandos</span></button>
 </nav>
 
-<script src="script.js"></script>
+<script src="script.js?v=4"></script>
 </body>
 </html>
