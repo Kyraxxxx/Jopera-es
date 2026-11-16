@@ -4,11 +4,10 @@
 //  Canal de sync: http://127.0.0.1:47821/api/state (servidor do app)
 //  Fallback: localStorage (mesma origem do iframe no Electron)
 // ============================================================
-// se a página foi servida pelo próprio app (celular no Wi-Fi → http://IP:47821),
-// usa a mesma origem p/ a API; senão (iframe do app / GitHub Pages) usa 127.0.0.1
-const API_BASE = (location.port === '47821' && /^https?:$/.test(location.protocol))
-  ? location.origin
-  : 'http://127.0.0.1:47821';
+// servido pelo próprio app (IP local :47821, túnel trycloudflare.com ou LAN)
+// → usa a mesma origem p/ a API. No iframe do app (app://) ou GitHub Pages → 127.0.0.1
+const SELF_HOSTED = /^https?:$/.test(location.protocol) && !location.hostname.endsWith('github.io');
+const API_BASE = SELF_HOSTED ? location.origin : 'http://127.0.0.1:47821';
 const SYNC_URL = API_BASE + '/api/state';
 const CMD_URL = API_BASE + '/api/cmd';
 const EQ_URL = API_BASE + '/api/equity';
@@ -405,6 +404,11 @@ setInterval(drawBook, 900);
 // ---------- equipe ----------
 function renderStaff() {
   const grid = $('staffGrid');
+  // sem servidor = escritório fechado: não mostra atividade fake
+  if (!S.serverUp) {
+    grid.innerHTML = '<div style="color:#848E9C;font-size:11px;grid-column:1/-1;padding:8px 4px">🏢 Escritório fechado — equipe offline. Abra o app J Tradings.</div>';
+    return;
+  }
   const staff = S.dbStaff && Object.keys(S.dbStaff).length ? S.dbStaff : lsGet('jt_staff', {});
   const names = Object.keys(staff);
   if (!names.length) {
@@ -569,6 +573,11 @@ ingestState = function (st) { _ingest(st); if (st && st.offline) showOfflineRepo
 function renderRH() {
   const sum = $('rhSummary'), list = $('rhList');
   if (!sum || !list) return;
+  if (!S.serverUp) {
+    sum.innerHTML = '<span>🏢 Escritório fechado — RH indisponível offline</span>';
+    list.innerHTML = '';
+    return;
+  }
   const staff = S.dbStaff && Object.keys(S.dbStaff).length ? S.dbStaff : lsGet('jt_staff', {});
   const names = Object.keys(staff).filter((n) => !(staff[n] && staff[n].fired));
   const vagas = Math.max(0, 4 - names.length); // estações da ala de contratos
