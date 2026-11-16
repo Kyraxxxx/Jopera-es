@@ -46,9 +46,8 @@ async function fetchMarket() {
     S.high24 = parseFloat(j.highPrice);
     S.low24 = parseFloat(j.lowPrice);
     S.vol24 = parseFloat(j.volume);
-    setConn('server', true);
   } catch {
-    if (!S.serverUp) setConn('offline', false);
+    if (!S.serverUp && !S.ghMode) setConn('offline', false);
     if (!S.price) S.price = 67000 + Math.random() * 30000;
   }
 }
@@ -115,8 +114,10 @@ async function pollServer() {
   }
 }
 function ingestState(st) {
-  if (!st || st.ts === S.lastStateTs) return;
+  if (!st || !st.ts) return;
+  if (st.ts === S.lastStateTs) return;
   S.lastStateTs = st.ts;
+  S.lastSyncAt = st.ts; // idade real do estado (quando o app gerou), não do fetch
   const primed = !!S._primed;
   // ordens novas → executa no livro local (dedupe por chave)
   // na PRIMEIRA carga só marca como vistas — não re-executa histórico
@@ -518,7 +519,7 @@ function render() {
   $('l24').textContent = S.low24 ? MONO(S.low24) : '—';
   $('v24').textContent = S.vol24 ? S.vol24.toFixed(2) + ' BTC' : '—';
   // saldo oficial = banco persistido no app (disco); local é fallback offline
-  const realized = S.dbTotals ? (S.dbTotals.realizedPnl || 0) : S.realized;
+  const realized = S.dbTotals ? (S.dbTotals.realizedPnl ?? S.dbTotals.balance ?? 0) : S.realized;
   $('bal').textContent = fmt$(realized);
   const upnl = S.pos ? (S.price - S.avg) * S.pos : 0;
   const tot = realized + upnl;
@@ -526,8 +527,17 @@ function render() {
   $('pnl').className = 'pnl mono ' + (tot >= 0 ? 'up' : 'dn');
   $('pos').textContent = S.pos.toFixed(4) + ' BTC';
   $('avg').textContent = S.avg ? MONO(S.avg) : '—';
-  $('dbtot').textContent = S.dbTotals ? fmt$(S.dbTotals.realizedPnl || 0) : fmt$(S.realized);
+  $('dbtot').textContent = S.dbTotals ? fmt$(S.dbTotals.realizedPnl ?? S.dbTotals.balance ?? 0) : fmt$(S.realized);
   const bp = $('balPill'); if (bp) { bp.textContent = fmt$(realized); bp.className = 'bal-pill mono ' + (realized >= 0 ? 'up' : 'dn'); }
+  // idade do último estado sincronizado (app aberto → segundos; fechado → minutos/horas)
+  const sa = $('syncAge');
+  if (sa) {
+    if (S.lastSyncAt) {
+      const age = Math.max(0, Date.now() - S.lastSyncAt);
+      sa.textContent = age < 90e3 ? '· agora' : age < 36e5 ? '· há ' + Math.round(age / 6e4) + 'min' : '· há ' + (age / 36e5).toFixed(1) + 'h';
+      sa.title = 'Último estado do app: ' + new Date(S.lastSyncAt).toLocaleString('pt-BR');
+    } else sa.textContent = '';
+  }
   $('eqBadge').textContent = fmt$(tot);
   $('eqBadge').style.color = tot >= 0 ? 'var(--up)' : 'var(--dn)';
   renderGoals(realized);
