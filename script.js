@@ -498,6 +498,7 @@ function render() {
   $('pos').textContent = S.pos.toFixed(4) + ' BTC';
   $('avg').textContent = S.avg ? MONO(S.avg) : '—';
   $('dbtot').textContent = S.dbTotals ? fmt$(S.dbTotals.realizedPnl || 0) : fmt$(S.realized);
+  const bp = $('balPill'); if (bp) { bp.textContent = fmt$(realized); bp.className = 'bal-pill mono ' + (realized >= 0 ? 'up' : 'dn'); }
   $('eqBadge').textContent = fmt$(tot);
   $('eqBadge').style.color = tot >= 0 ? 'var(--up)' : 'var(--dn)';
   renderGoals(realized);
@@ -513,39 +514,26 @@ function render() {
 setInterval(render, 500);
 setInterval(() => { if (!S.open && S.price) S.open = S.price; }, 5000);
 
-// ---------- NAVEGAÇÃO POR SEÇÃO (estilo Twitter) ----------
+// ---------- NAVEGAÇÃO POR SEÇÃO (bottom nav mobile) ----------
 (function initNav() {
-  const btns = document.querySelectorAll('.nav-btn');
+  const btns = document.querySelectorAll('.nb');
   const cards = document.querySelectorAll('.card');
-  // mapeia seções para cards (índice baseado na ordem do HTML)
-  const sectionMap = {
-    top: 0,      // gráfico
-    staff: 6,    // equipe (após gráfico, caixa, equity, operar, comandos, book)
-    rh: 7,       // RH
-    cmd: 4,      // comandos
-  };
-  function scrollToSection(name) {
-    btns.forEach((b) => b.classList.toggle('active', b.dataset.section === name));
-    const idx = sectionMap[name];
-    if (idx !== undefined && cards[idx]) {
-      cards[idx].scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
+  // ordem dos cards no DOM: 0 gráfico,1 equity | 2 caixa,3 operar,4 comandos,5 book,6 equipe,7 rh,8 feed
+  const secIdx = { charts: 0, cash: 2, team: 6, cmd: 4 };
+  function scrollTo(name) {
+    btns.forEach((b) => b.classList.toggle('active', b.dataset.sec === name));
+    const i = secIdx[name];
+    if (i !== undefined && cards[i]) cards[i].scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
-  btns.forEach((b) => { b.onclick = () => scrollToSection(b.dataset.section); });
-  // scroll spy: marca botão ativo baseado na posição
+  btns.forEach((b) => { b.onclick = () => scrollTo(b.dataset.sec); });
+  // scroll spy
   window.addEventListener('scroll', () => {
-    const scrollY = window.scrollY + 100;
-    let active = 'top';
-    cards.forEach((card, i) => {
-      if (card.offsetTop <= scrollY) {
-        // encontra a seção correspondente
-        if (i === 0) active = 'top';
-        else if (i === 4) active = 'cmd';
-        else if (i === 6) active = 'staff';
-        else if (i === 7) active = 'rh';
-      }
-    });
-    btns.forEach((b) => b.classList.toggle('active', b.dataset.section === active));
+    const y = window.scrollY + 120;
+    let act = 'charts';
+    for (const [sec, i] of Object.entries(secIdx)) {
+      if (cards[i] && cards[i].offsetTop <= y) act = sec;
+    }
+    btns.forEach((b) => b.classList.toggle('active', b.dataset.sec === act));
   }, { passive: true });
 })();
 
