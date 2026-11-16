@@ -81,42 +81,59 @@ setInterval(addTick, 250);
 // ---------- conexão / sync ----------
 function setConn(mode) {
   const dot = $('netDot'), net = $('net');
-  S.serverUp = mode === 'server';
-  dot.className = 'dot ' + (mode === 'server' ? 'on' : mode === 'local' ? 'mid' : '');
-  net.textContent = mode === 'server' ? 'AO VIVO · APP' : mode === 'local' ? 'MODO LOCAL' : 'OFFLINE';
+  S.serverUp = mode === 'server' || mode === 'cloud';
+  dot.className = 'dot ' + (mode === 'server' ? 'on' : mode === 'cloud' ? 'mid' : '');
+  net.textContent = mode === 'server' ? 'AO VIVO · APP' : mode === 'cloud' ? 'VIA GITHUB · ~20s' : mode === 'local' ? 'MODO LOCAL' : 'OFFLINE';
 }
 const trimSet = (set, n) => { if (set.size > n) { const keep = [...set].slice(-n >> 1); set.clear(); keep.forEach(k => set.add(k)); } };
+const GH_STATE = 'https://raw.githubusercontent.com/kyraxxxx/Jopera-es/state.json';
+async function pollGitHub() {
+  try {
+    const r = await fetch(GH_STATE + '?t=' + Date.now(), { cache: 'no-store' });
+    if (!r.ok) throw 0;
+    const st = await r.json();
+    if (!st || !st.ts) throw 0;
+    ingestState(st);
+    S.ghMode = true;
+  } catch { S.ghMode = false; }
+}
 async function pollServer() {
   try {
     const r = await fetch(SYNC_URL, { cache: 'no-store' });
     if (!r.ok) throw 0;
     const st = await r.json();
     setConn('server');
+    S.ghMode = false;
     // servidor cobre tudo via IPC — limpa filas locais para não duplicar depois
     try { localStorage.setItem('jt_orders', '[]'); localStorage.setItem('jt_pnl', '[]'); } catch {}
     ingestState(st);
   } catch {
-    setConn('local');
-    pollLocal(); // fallback: filas localStorage quando o app está fechado/acessando via GitHub Pages
+    // sem servidor local → tenta o estado publicado no GitHub (app rodando em outro lugar/mesma net)
+    await pollGitHub();
+    setConn(S.ghMode ? 'cloud' : 'local');
+    pollLocal(); // fallback: filas localStorage quando tudo está fora
   }
 }
 function ingestState(st) {
   if (!st || st.ts === S.lastStateTs) return;
   S.lastStateTs = st.ts;
+  const primed = !!S._primed;
   // ordens novas → executa no livro local (dedupe por chave)
+  // na PRIMEIRA carga só marca como vistas — não re-executa histórico
   for (const o of (st.orders || [])) {
     const k = orderKey(o);
     if (S.seenOrders.has(k)) continue;
     S.seenOrders.add(k); trimSet(S.seenOrders, 800);
-    execOrder(o.side, o.qty, o.trader || 'NPC', true);
+    if (primed) execOrder(o.side, o.qty, o.trader || 'NPC', true);
   }
   // eventos de pnl → estatísticas por trader (win rate)
   for (const p of (st.pnl || [])) {
     const k = pnlKey(p);
     if (S.seenPnl.has(k)) continue;
     S.seenPnl.add(k); trimSet(S.seenPnl, 800);
-    notePnl(p.trader, p.pnl);
+    if (primed) notePnl(p.trader, p.pnl);
   }
+  S._primed = true;
   // equipe + totais do banco
   S.dbStaff = st.staff || {};
   S.dbTotals = st.totals || null;
