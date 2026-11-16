@@ -86,7 +86,7 @@ function setConn(mode) {
   net.textContent = mode === 'server' ? 'AO VIVO · APP' : mode === 'cloud' ? 'VIA GITHUB · ~20s' : mode === 'local' ? 'MODO LOCAL' : 'OFFLINE';
 }
 const trimSet = (set, n) => { if (set.size > n) { const keep = [...set].slice(-n >> 1); set.clear(); keep.forEach(k => set.add(k)); } };
-const GH_STATE = 'https://raw.githubusercontent.com/kyraxxxx/Jopera-es/main/state.json';
+const GH_STATE = 'https://raw.githubusercontent.com/kyraxxxx/Jopera-es/live/state.json';
 async function pollGitHub() {
   try {
     const r = await fetch(GH_STATE + '?t=' + Date.now(), { cache: 'no-store' });
