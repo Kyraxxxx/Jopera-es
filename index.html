@@ -5,140 +5,125 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>J Tradings — Terminal BTC</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<!-- HEADER FIXO -->
-<header class="topbar">
-  <div class="brand">
-    <div class="logo-mark">J</div>
-    <div>
-      <div class="brand-name">J TRADINGS</div>
-      <div class="brand-sub">BITCOIN EXCHANGE</div>
+
+<!-- ============ HEADER ============ -->
+<header class="hd">
+  <div class="hd-left">
+    <div class="logo">J</div>
+    <div class="hd-title">
+      <b>J TRADINGS</b>
+      <span>BITCOIN EXCHANGE</span>
     </div>
   </div>
-  <div class="ticker">
-    <div class="t-price mono" id="price">—</div>
-    <div class="t-chg mono" id="chg">—</div>
+  <div class="hd-pair">
+    <span class="pair">BTC/USDT</span>
+    <span class="price mono" id="price">—</span>
+    <span class="chg mono" id="chg">—</span>
   </div>
-  <div class="conn"><span class="dot" id="netDot"></span><span id="net">OFFLINE</span></div>
+  <div class="hd-right">
+    <div class="conn"><i class="dot" id="netDot"></i><span id="net">OFFLINE</span></div>
+    <div class="bal-pill mono" id="balPill">$0.00</div>
+  </div>
 </header>
 
-<div id="meetBanner" class="hidden">⏸ MERCADO EM PAUSA — REUNIÃO EXECUTIVA</div>
-<div id="offBanner" class="hidden"></div>
+<div id="meetBanner" class="banner meet hidden">⏸ MERCADO EM PAUSA — REUNIÃO EXECUTIVA</div>
+<div id="offBanner" class="banner off hidden"></div>
 
-<!-- FEED PRINCIPAL (estilo Twitter) -->
-<main class="feed">
-  <!-- CARD: GRÁFICO BTC -->
-  <div class="card">
-    <div class="card-head">
-      <span class="card-title">BTC/USDT · Candlestick 1s</span>
-      <span class="ph-badge live">AO VIVO</span>
-    </div>
-    <div id="chartWrap"><canvas id="cv"></canvas></div>
-    <div class="legend mono">
-      <span><i class="lg ema"></i>EMA 20</span>
-      <span><i class="lg mark buy"></i>Compra</span>
-      <span><i class="lg mark sell"></i>Venda</span>
-    </div>
-  </div>
+<!-- ============ LAYOUT ============ -->
+<main class="layout">
 
-  <!-- CARD: CAIXA -->
-  <div class="card">
-    <div class="card-head">
-      <span class="card-title">Caixa J Tradings</span>
-      <span class="ph-badge ok">BASE $0.00</span>
+  <!-- COLUNA ESQUERDA (gráficos) -->
+  <section class="col-main">
+    <div class="card chart-card">
+      <div class="card-hd">
+        <span class="ct">BTC/USDT · Candlestick 1s</span>
+        <span class="badge live">AO VIVO</span>
+      </div>
+      <div class="chart-zone"><canvas id="cv"></canvas></div>
+      <div class="legend mono">
+        <span><i class="sw ema"></i>EMA 20</span>
+        <span><i class="sw b"></i>Compra</span>
+        <span><i class="sw s"></i>Venda</span>
+      </div>
     </div>
-    <div class="bal mono" id="bal">$0.00</div>
-    <div class="pnl mono" id="pnl">PnL $0.00</div>
-    <div class="kv mono"><span>Posição</span><b id="pos">0.0000 BTC</b></div>
-    <div class="kv mono"><span>Preço médio</span><b id="avg">—</b></div>
-    <div class="kv mono"><span>Lucro total banco</span><b id="dbtot">$0.00</b></div>
-    <div class="goals" id="goals"></div>
-  </div>
 
-  <!-- CARD: EQUITY -->
-  <div class="card">
-    <div class="card-head">
-      <span class="card-title">Curva de Patrimônio</span>
-      <span class="ph-badge" id="eqBadge">$0.00</span>
+    <div class="card eq-card">
+      <div class="card-hd">
+        <span class="ct">Curva de Patrimônio — Caixa da Empresa</span>
+        <span class="badge" id="eqBadge">$0.00</span>
+      </div>
+      <div class="eq-zone"><canvas id="eq"></canvas></div>
     </div>
-    <div id="eqWrap"><canvas id="eq"></canvas></div>
-  </div>
+  </section>
 
-  <!-- CARD: OPERAR -->
-  <div class="card">
-    <div class="card-head">
-      <span class="card-title">Operar</span>
-    </div>
-    <div class="qty"><input id="qty" type="number" step="0.001" min="0.001" value="0.005" class="mono"></div>
-    <div class="btns">
-      <button id="btnBuy" class="btn-buy">▲ COMPRAR · LONG</button>
-      <button id="btnSell" class="btn-sell">▼ VENDER · SHORT</button>
-    </div>
-  </div>
+  <!-- COLUNA DIREITA -->
+  <aside class="col-side">
 
-  <!-- CARD: COMANDOS -->
-  <div class="card">
-    <div class="card-head">
-      <span class="card-title">Comando do Chefe</span>
-      <span class="ph-badge cmd">REMOTO</span>
+    <div class="card">
+      <div class="card-hd"><span class="ct">Caixa J Tradings</span><span class="badge ok">BASE</span></div>
+      <div class="cash">
+        <div class="bal-big mono" id="bal">$0.00</div>
+        <div class="pnl mono" id="pnl">PnL $0.00</div>
+      </div>
+      <div class="kv mono"><span>Posição</span><b id="pos">0.0000 BTC</b></div>
+      <div class="kv mono"><span>Preço médio</span><b id="avg">—</b></div>
+      <div class="kv mono"><span>Lucro total banco</span><b id="dbtot">$0.00</b></div>
+      <div class="goals" id="goals"></div>
     </div>
-    <div class="cmd-btns">
-      <button id="cmdMeet" class="cmd-btn meet">📅 Convocar Reunião</button>
-      <button id="cmdEnd" class="cmd-btn end">✅ Encerrar Reunião</button>
-    </div>
-    <div class="cmd-btns" style="padding-top:0">
-      <button id="cmdReport" class="cmd-btn" style="flex:1;border-color:rgba(14,203,129,.4);color:var(--up)">📊 Gerar Relatório</button>
-    </div>
-  </div>
 
-  <!-- CARD: LIVRO DE ORDENS -->
-  <div class="card">
-    <div class="card-head">
-      <span class="card-title">Livro de Ordens</span>
+    <div class="card">
+      <div class="card-hd"><span class="ct">Operar</span></div>
+      <div class="qty"><input id="qty" type="number" step="0.001" min="0.001" value="0.005" inputmode="decimal"></div>
+      <div class="btns">
+        <button id="btnBuy" class="btn buy">▲ COMPRAR</button>
+        <button id="btnSell" class="btn sell">▼ VENDER</button>
+      </div>
     </div>
-    <div id="book"></div>
-  </div>
 
-  <!-- CARD: EQUIPE -->
-  <div class="card">
-    <div class="card-head">
-      <span class="card-title">Equipe de Traders</span>
-      <span class="ph-badge ia">IA ATIVA</span>
+    <div class="card">
+      <div class="card-hd"><span class="ct">Comando do Chefe</span><span class="badge cmd">REMOTO</span></div>
+      <div class="cmd-grid">
+        <button id="cmdMeet" class="cmd-btn meet">📅 Reunião</button>
+        <button id="cmdEnd" class="cmd-btn end">✅ Encerrar</button>
+        <button id="cmdReport" class="cmd-btn rpt">📊 Relatório</button>
+      </div>
     </div>
-    <div id="staffGrid" class="staff-grid"></div>
-  </div>
 
-  <!-- CARD: RH -->
-  <div class="card">
-    <div class="card-head">
-      <span class="card-title">Recursos Humanos</span>
-      <span class="ph-badge cmd">RH</span>
+    <div class="card">
+      <div class="card-hd"><span class="ct">Livro de Ordens</span></div>
+      <div class="book" id="book"></div>
     </div>
-    <div class="rh-summary mono" id="rhSummary"></div>
-    <div class="rh-actions">
-      <button id="btnHire" class="cmd-btn" style="flex:1">🤝 Contratar da Agência</button>
-    </div>
-    <div id="rhList" class="rh-list"></div>
-  </div>
 
-  <!-- CARD: FEED DE ORDENS -->
-  <div class="card">
-    <div class="card-head">
-      <span class="card-title">Ordens em Tempo Real</span>
+    <div class="card">
+      <div class="card-hd"><span class="ct">Equipe de Traders</span><span class="badge ia">IA</span></div>
+      <div class="staff" id="staffGrid"></div>
     </div>
-    <div id="feed"></div>
-  </div>
+
+    <div class="card">
+      <div class="card-hd"><span class="ct">Recursos Humanos</span><span class="badge cmd">RH</span></div>
+      <div class="rh-sum mono" id="rhSummary"></div>
+      <div class="rh-act"><button id="btnHire" class="cmd-btn rpt" style="width:100%">🤝 Contratar da Agência</button></div>
+      <div class="rh-list" id="rhList"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-hd"><span class="ct">Feed de Ordens</span></div>
+      <div class="feed" id="feed"></div>
+    </div>
+
+  </aside>
 </main>
 
-<!-- BOTTOM NAV (estilo Twitter) -->
-<nav class="bottom-nav">
-  <button class="nav-btn active" data-section="top">🏠<span>Início</span></button>
-  <button class="nav-btn" data-section="staff">👥<span>Equipe</span></button>
-  <button class="nav-btn" data-section="rh">🧑‍💼<span>RH</span></button>
-  <button class="nav-btn" data-section="cmd">⚡<span>Comandos</span></button>
+<!-- ============ BOTTOM NAV (mobile) ============ -->
+<nav class="bnav">
+  <button class="nb active" data-sec="charts">📈<span>Gráficos</span></button>
+  <button class="nb" data-sec="cash">💰<span>Caixa</span></button>
+  <button class="nb" data-sec="team">👥<span>Equipe</span></button>
+  <button class="nb" data-sec="cmd">⚡<span>Comandos</span></button>
 </nav>
 
 <script src="script.js"></script>
