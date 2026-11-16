@@ -63,6 +63,18 @@ function addTick() {
     last.c = S.price; last.h = Math.max(last.h, S.price); last.l = Math.min(last.l, S.price);
   }
 }
+// restaura gráficos salvos (não zera no reload/F5)
+try {
+  const saved = JSON.parse(localStorage.getItem('jt_charts') || 'null');
+  if (saved) {
+    if (Array.isArray(saved.candles) && saved.candles.length) S.candles = saved.candles.slice(-120);
+    if (Array.isArray(saved.equity) && saved.equity.length) { S.equity = saved.equity.slice(-300); S.historyLoaded = true; }
+  }
+} catch {}
+setInterval(() => {
+  try { localStorage.setItem('jt_charts', JSON.stringify({ candles: S.candles.slice(-120), equity: S.equity.slice(-300) })); } catch {}
+}, 5000);
+
 setInterval(fetchMarket, 5000); fetchMarket();
 setInterval(addTick, 250);
 
