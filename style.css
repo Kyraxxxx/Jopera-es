@@ -49,6 +49,7 @@ body{
 .dot{width:8px;height:8px;border-radius:50%;background:#5a6470}
 .dot.on{background:var(--up);box-shadow:0 0 8px var(--up);animation:pl 1.6s infinite}
 .dot.mid{background:var(--gold)}
+.sync-age{font-size:9.5px;color:#5a6470;letter-spacing:.03em}
 @keyframes pl{50%{opacity:.35}}
 .bal-pill{
   font-size:14px;font-weight:800;padding:7px 14px;border-radius:10px;
